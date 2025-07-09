@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from storage import upload_file
+from ocr import file_ocr
 
 app = FastAPI(title="Ratios Automation Webhook")
 
@@ -39,6 +40,10 @@ async def receive_document (
         "orginal_name": file.filename,
         "size_bytes": len(content)
     }
+# --------------------------------------------------------------------------
+async def process_document_ocr(blob_url:str, client_id: str):
+    ocr_json = await file_ocr(blob_url)
+    print(ocr_json)
 
 if __name__ == "__main__":
     import uvicorn
