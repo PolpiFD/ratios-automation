@@ -2,3 +2,4 @@ fastapi==0.116.0          # framework API
 uvicorn[standard]==0.35.0 # serveur ASGI + extras perf
 azure-identity==1.23.0    # authentification Azure
 azure-storage-blob==12.25.1
+azure-ai-documentintelligence==1.0.0b4
