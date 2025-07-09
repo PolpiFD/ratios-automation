@@ -8,12 +8,13 @@ from azure.identity.aio import DefaultAzureCredential
 
 ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
 CONTAINER = "file-automation-ratios"
+print (f"Account url -> {ACCOUNT_URL}")
 
 credential = DefaultAzureCredential()
-blob_service = BlobServiceClient(account_url=ACCOUNT_URL, crendential=credential)
+print (f"crendential -> {credential}")
+blob_service = BlobServiceClient(account_url=ACCOUNT_URL, credential=credential)
 container_client = blob_service.get_container_client(CONTAINER)
 
-#print(blob_service)
 
 ####################################################################################
 

@@ -3,10 +3,11 @@ from pathlib import Path
 import mimetypes
 import uuid
 import aiofiles
-from storage import upload_file
 
 from dotenv import load_dotenv
 load_dotenv()
+
+from storage import upload_file
 
 app = FastAPI(title="Ratios Automation Webhook")
 
