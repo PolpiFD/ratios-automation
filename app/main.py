@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from pathlib import Path
 import mimetypes
-from uuid import UUID
+import uuid
 import aiofiles
 
 app = FastAPI(title="Ratios Automation Webhook")
@@ -31,7 +31,7 @@ async def receive_document (
     
     mime = file.content_type or mimetypes.guess_type(file.filename)[0]
 
-    new_name = f"={client_id}_{UUID}{suffix}"
+    new_name = f"={client_id}_{uuid.uuid4().hex}{suffix}"
     save_path = UPLOAD_DIR/new_name
 
     async with aiofiles.open(save_path, "wb") as buffer :
