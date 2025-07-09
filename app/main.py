@@ -1,13 +1,14 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, BackgroundTasks
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from pathlib import Path
 import mimetypes
 import uuid
+import asyncio
 import aiofiles
 
 from dotenv import load_dotenv
 load_dotenv()
 
-from storage import upload_file
+from storage import upload_file, make_read_sas_url
 from ocr import file_ocr
 
 app = FastAPI(title="Ratios Automation Webhook")
@@ -18,7 +19,6 @@ ALLOWED_EXT = {".pdf", ".jpeg", ".png", ".jpg"}
 
 @app.post("/webhook")
 async def receive_document (
-    background_tasks: BackgroundTasks, #Pour déclencher l'OCR en tâche de fond
     client_id : str = Form(..., description="Customer's folder ID"),
     file : UploadFile = File(..., description="File for processing")
 ):
@@ -31,8 +31,13 @@ async def receive_document (
         raise HTTPException(400, f"Extension {suffix} non autorisée")
     
     mime = file.content_type or mimetypes.guess_type(file.filename)[0]
-    new_name = f"={client_id}_{uuid.uuid4().hex}{suffix}"
+    new_name = f"{client_id}_{uuid.uuid4().hex}{suffix}"
     blob_url = await upload_file(content, new_name, mime)
+    print(f"Url du document stocké {blob_url}")
+
+    sas_url = make_read_sas_url("file-automation-ratios", new_name)
+    print(sas_url)
+    asyncio.create_task(process_document_ocr(sas_url, client_id))
 
     return {
         "status": "accepted",

@@ -8,7 +8,9 @@ ENDPOINT = os.getenv("AZURE_DI_ENDPOINT")
 CRED = os.getenv("AZURE_DI_KEY")
 MODEL_ID = "prebuilt-read"
 
-async def file_ocr (blob_url: str) -> str:
+
+
+async def file_ocr (blob_url: str) -> dict:
     client = DocumentIntelligenceClient(
         endpoint=ENDPOINT,
         credential=AzureKeyCredential(CRED)
@@ -18,5 +20,5 @@ async def file_ocr (blob_url: str) -> str:
         poller = await client.begin_analyze_document(
             MODEL_ID, AnalyzeDocumentRequest(url_source=blob_url)
         )
-        result = poller.result
-        #print(result)
+        result = await poller.result()
+        return result
