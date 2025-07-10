@@ -2,6 +2,7 @@ import os, json
 from azure.core.credentials import AzureKeyCredential
 from azure.ai.documentintelligence.aio import DocumentIntelligenceClient
 from azure.ai.documentintelligence.models import AnalyzeDocumentRequest
+from azure.ai.documentintelligence.models import AnalyzeResult
 
 
 ENDPOINT = os.getenv("AZURE_DI_ENDPOINT")
@@ -20,5 +21,5 @@ async def file_ocr (blob_url: str) -> dict:
         poller = await client.begin_analyze_document(
             MODEL_ID, AnalyzeDocumentRequest(url_source=blob_url)
         )
-        result = await poller.result()
-        return result
+        result: AnalyzeResult = await poller.result()
+        return result.content

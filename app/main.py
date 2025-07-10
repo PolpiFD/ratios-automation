@@ -3,7 +3,6 @@ from pathlib import Path
 import mimetypes
 import uuid
 import asyncio
-import aiofiles
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -22,7 +21,7 @@ async def receive_document (
     client_id : str = Form(..., description="Customer's folder ID"),
     file : UploadFile = File(..., description="File for processing")
 ):
-
+    print(f"Client id réceptionné via le webhook: {client_id}")
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(413, "Fichier trop volumineux (max 300mo)")
@@ -54,6 +53,4 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
-
-
 

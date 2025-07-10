@@ -1,6 +1,4 @@
 import os
-from pathlib import Path
-from uuid import uuid4
 from azure.storage.blob.aio import BlobServiceClient
 from azure.storage.blob import ContentSettings
 from azure.identity.aio import DefaultAzureCredential
