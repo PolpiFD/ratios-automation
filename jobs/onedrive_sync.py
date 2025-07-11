@@ -1,6 +1,7 @@
-import os, asyncio, logging, re
+import os, asyncio, logging, re, pathlib
 from datetime import datetime, timezone
 import msal
+from msal import SerializableTokenCache
 import httpx
 from azure.data.tables import TableClient
 
@@ -8,28 +9,61 @@ from dotenv import load_dotenv
 load_dotenv()
 
 #------------CONFIG-------------------------------------
+CACH_PATH = pathlib.Path.home() / ".msal_ratios.cache"
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 TENANT_ID = os.getenv("AZURE_TENANT_ID")
-CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
-UPN = os.getenv("AZURE_UPN")
+SCOPES = ["Files.ReadWrite.All"]
 #-------------------------------------------------------
 
+#verification si token en cache
+
+token_cache = SerializableTokenCache()
+if CACH_PATH.exists():
+    token_cache.deserialize(CACH_PATH.read_text())
+
 #Obtention du token 
-app = msal.ConfidentialClientApplication(
+app = msal.PublicClientApplication (
     client_id=CLIENT_ID,
-    client_credential=CLIENT_SECRET,
-    authority=f"https://login.microsoftonline.com/{TENANT_ID}"
+    authority=f"https://login.microsoftonline.com/{TENANT_ID}",
+    token_cache=token_cache
 )
-token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])
-access_token = token["access_token"]
-print(access_token)
 
-headers = {"Authorization": f"Bearer {access_token}"}
+def get_graph_token():
 
-with httpx.Client(base_url="https://graph.microsoft.com/v1.0",
-                  headers=headers, timeout=30) as session:
-    resp = session.get(f"/users/{UPN}/drive")
-    resp.raise_for_status()
-    drive_info = resp.json()
+    # 1) Tente le cache d'abord
+    accounts = app.get_accounts()
+    if accounts:
+        result = app.acquire_token_silent(SCOPES, account=accounts[0])
+        if result and "access_token" in result:
+            return result["access_token"]
 
-print("Drive ID :", drive_info["id"])
+    # 2) sinon on lance le device-code flow une fois
+    flow = app.initiate_device_flow(scopes=SCOPES)
+    print(f"Variable flow >>> {flow}")
+    if "user_code" not in flow:
+        raise RuntimeError("Device-code flow impossible: " + str(flow))
+    
+    print(">>> Ouvre", flow["verification_uri"])
+    print(">>> Entre le code :", flow["user_code"])
+
+    result = app.acquire_token_by_device_flow(flow)
+    if "access_token" not in result:
+        raise RuntimeError("Auth failed:" + str(result))
+    CACH_PATH.write_text(token_cache.serialize())
+    return result["access_token"]
+
+token = get_graph_token()
+
+async def main():
+    headers = {"Authorization": f"Bearer {token}"}
+    async with httpx.AsyncClient(
+        base_url="https://graph.microsoft.com/v1.0",
+        headers=headers,
+        timeout=30
+    ) as client:
+        me_drive = await client.get("/me/drive")
+        me_drive.raise_for_status()
+        print("Mon drive ID : " + me_drive.json()["id"])
+
+if __name__ == "__main__":
+    asyncio.run(main())
