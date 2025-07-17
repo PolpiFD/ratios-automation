@@ -33,6 +33,7 @@ def get_graph_token():
     if accounts:
         result = app.acquire_token_silent(SCOPES, account=accounts[0])
         if result and "access_token" in result:
+            print("Token déjà existant")
             return result["access_token"]
 
     # 2) sinon on lance le device-code flow une fois
