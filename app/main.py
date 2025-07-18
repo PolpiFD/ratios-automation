@@ -9,6 +9,7 @@ load_dotenv()
 
 from storage import upload_file, make_read_sas_url
 from ocr import file_ocr
+from llm import categorisation
 
 app = FastAPI(title="Ratios Automation Webhook")
 
@@ -48,7 +49,8 @@ async def receive_document (
 # --------------------------------------------------------------------------
 async def process_document_ocr(blob_url:str, client_id: str):
     ocr_json = await file_ocr(blob_url)
-    print(ocr_json)
+    category = await categorisation(ocr_json)
+    print(category)
 
 if __name__ == "__main__":
     import uvicorn
