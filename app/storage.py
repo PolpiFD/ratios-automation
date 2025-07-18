@@ -11,7 +11,8 @@ CONTAINER = "file-automation-ratios"
 print (f"Account url -> {ACCOUNT_URL}")
 
 credential = DefaultAzureCredential()
-print (f"crendential -> {credential}")
+tok =  credential.get_token("https://storage.azure.com/.default")
+print (f"credential -> {credential} \n {tok}")
 blob_service = BlobServiceClient(account_url=ACCOUNT_URL, credential=credential)
 container_client = blob_service.get_container_client(CONTAINER)
 
@@ -21,7 +22,6 @@ container_client = blob_service.get_container_client(CONTAINER)
 async def upload_file (data: bytes, filename: str, mime: str) -> str:
     blob_name = filename
     blob_client = container_client.get_blob_client(blob_name)
-
     await blob_client.upload_blob(
         data,
         overwrite=False,
