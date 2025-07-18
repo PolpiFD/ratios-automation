@@ -22,6 +22,7 @@ async def receive_document (
     file : UploadFile = File(..., description="File for processing")
 ):
     print(f"Client id réceptionné via le webhook: {client_id}")
+    print()
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(413, "Fichier trop volumineux (max 300mo)")

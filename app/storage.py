@@ -9,10 +9,10 @@ from datetime import datetime, timedelta
 ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
 CONTAINER = "file-automation-ratios"
 print (f"Account url -> {ACCOUNT_URL}")
+secret = os.getenv('AZURE_CLIENT_SECRET')
+print(f"Secret -> {secret}")
 
 credential = DefaultAzureCredential()
-tok =  credential.get_token("https://storage.azure.com/.default")
-print (f"credential -> {credential} \n {tok}")
 blob_service = BlobServiceClient(account_url=ACCOUNT_URL, credential=credential)
 container_client = blob_service.get_container_client(CONTAINER)
 

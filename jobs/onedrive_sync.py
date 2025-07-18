@@ -8,7 +8,7 @@ from get_graph_token import get_graph_token
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 DRIVE_ID = os.getenv("DRIVE_ID")
 TABLE_NAME = "ClientFolderIndex"
-TABLE_URL = "https://ratiosautomationstockage.table.core.windows.net"
+TABLE_URL = "https://storageratios.table.core.windows.net"
 ACCOUNT_NAME = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
 # --------- VARIABLES -------------
 
