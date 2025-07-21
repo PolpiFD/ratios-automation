@@ -7,9 +7,11 @@ import asyncio
 from dotenv import load_dotenv
 load_dotenv()
 
-from storage import upload_file, make_read_sas_url
-from ocr import file_ocr
-from llm import categorisation
+from .storage import upload_file, make_read_sas_url
+from .ocr import file_ocr
+from .llm import categorisation
+from .classement import classer
+from jobs.get_graph_token import get_graph_token
 
 app = FastAPI(title="Ratios Automation Webhook")
 
@@ -19,11 +21,11 @@ ALLOWED_EXT = {".pdf", ".jpeg", ".png", ".jpg"}
 
 @app.post("/webhook")
 async def receive_document (
+    client_name : str = Form(..., description="Client's name"),
     client_id : str = Form(..., description="Customer's folder ID"),
     file : UploadFile = File(..., description="File for processing")
 ):
     print(f"Client id réceptionné via le webhook: {client_id}")
-    print()
     content = await file.read()
     if len(content) > MAX_FILE_SIZE:
         raise HTTPException(413, "Fichier trop volumineux (max 300mo)")
@@ -38,7 +40,7 @@ async def receive_document (
 
     sas_url = make_read_sas_url("file-automation-ratios", new_name)
     print(sas_url)
-    asyncio.create_task(process_document_ocr(sas_url, client_id))
+    asyncio.create_task(process_document_ocr(sas_url, client_id, client_name, file.filename))
 
     return {
         "status": "accepted",
@@ -47,10 +49,18 @@ async def receive_document (
         "size_bytes": len(content)
     }
 # --------------------------------------------------------------------------
-async def process_document_ocr(blob_url:str, client_id: str):
+async def process_document_ocr(blob_url:str, client_id: str, client_name: str, file_name: str):
     ocr_json = await file_ocr(blob_url)
-    category = await categorisation(ocr_json)
-    print(category)
+    category = await categorisation(ocr_json, client_name)
+    row_key = f"{category.anne}_{category.categorie}"
+    print(row_key)
+    classement = await classer (
+        blob_url, 
+        filename=file_name, 
+        client_folder_id=client_id, 
+        categorie=row_key, 
+        graph_token=get_graph_token()
+    )
 
 if __name__ == "__main__":
     import uvicorn

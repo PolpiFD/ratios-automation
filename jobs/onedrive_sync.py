@@ -8,14 +8,14 @@ from get_graph_token import get_graph_token
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 DRIVE_ID = os.getenv("DRIVE_ID")
 TABLE_NAME = "ClientFolderIndex"
-TABLE_URL = "https://storageratios.table.core.windows.net"
+TABLE_URL = "https://ratiostorage.table.core.windows.net"
 ACCOUNT_NAME = os.getenv("AZURE_STORAGE_ACCOUNT_NAME")
 # --------- VARIABLES -------------
 
 # ------------- RULES ---------------
 CATEGORIES = {
     "00 - A traiter", "01 - Créanciers", "02 - Débiteurs", "03 - Banque",
-    "04 - RH", "05 - Cockpit", "06 - Comptabilité Générale", "07 - Stratégie",
+    "04 - Tickets", "05 - Cockpit", "06 - Comptabilité Générale", "07 - Stratégie",
     "08 - TVA", "09 - Bouclement"
 }
 
@@ -30,7 +30,6 @@ async def list_children(graph: httpx.AsyncClient, item_id: str):
     return resp.json()["value"]
 
 async def crawl_drive(token):
-    print("OK CRAWL")
     headers = {"Authorization": f"Bearer {token}"}
     async with httpx.AsyncClient(
         base_url="https://graph.microsoft.com/v1.0",
@@ -43,19 +42,16 @@ async def crawl_drive(token):
             if it["name"].strip().startswith("01") and "Client" in it["name"]
         )
         clients_id = clients_item["id"]
-        print(clients_id)
 
         #2) chaque client
         for cli in await list_children(graph, clients_id):
             cli_name = cli["name"]
             cli_id = cli["id"]
-            print(cli_name)
 
             #3) Chaque sous-dossier Année (4 chiffres)
             for yr in await list_children(graph, cli_id):
                 if not re_year.match(yr["name"]):
                     continue
-                print(yr["name"])
                 yr_name = yr["name"]
                 yr_id = yr["id"]
 
@@ -89,7 +85,7 @@ async def upsert_rows(rows):
         for r in rows:
             entity = {
                 "PartitionKey": r["client"],
-                "RowKey": f"{r['year']}#{r['category']}",
+                "RowKey": f"{r['year']}_{r['category']}",
                 "client_folder_id": r["client_folder_id"],
                 "folder_id": r["folder_id"],
                 "updated_utc": datetime.utcnow().isoformat(timespec="seconds"),
@@ -103,7 +99,6 @@ async def main():
 
     token = get_graph_token()
     rows = [r async for r in crawl_drive(token)]
-    print(rows)
     await upsert_rows(rows)
     logging.info("sync OK - %d lignes", len(rows))
 if __name__ == "__main__":

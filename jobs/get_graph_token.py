@@ -10,9 +10,9 @@ load_dotenv()
 CACHE_PATH = pathlib.Path(__file__).resolve().parents[1] / ".msal_ratios.cache"
 CLIENT_ID = os.getenv("AZURE_CLIENT_ID")
 TENANT_ID = os.getenv("AZURE_TENANT_ID")
-SCOPES = ["Files.ReadWrite.All"]
+SCOPES = ["User.Read", "Files.ReadWrite.All"]
 #-------------------------------------------------------
-
+print(CLIENT_ID)
 #Verification si token en cache
 
 token_cache = SerializableTokenCache()
@@ -38,7 +38,6 @@ def get_graph_token():
 
     # 2) sinon on lance le device-code flow une fois
     flow = app.initiate_device_flow(scopes=SCOPES)
-    print(f"Variable flow >>> {flow}")
     if "user_code" not in flow:
         raise RuntimeError("Device-code flow impossible: " + str(flow))
     

@@ -8,9 +8,8 @@ from datetime import datetime, timedelta
 
 ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
 CONTAINER = "file-automation-ratios"
-print (f"Account url -> {ACCOUNT_URL}")
 secret = os.getenv('AZURE_CLIENT_SECRET')
-print(f"Secret -> {secret}")
+
 
 credential = DefaultAzureCredential()
 blob_service = BlobServiceClient(account_url=ACCOUNT_URL, credential=credential)
@@ -29,8 +28,7 @@ async def upload_file (data: bytes, filename: str, mime: str) -> str:
     )
     return blob_client.url
 
-def make_read_sas_url (container: str, blob_name: str, seconds: int = 120) -> str:
-    print("make_read_sas_url -> OKKK")
+def make_read_sas_url (container: str, blob_name: str, seconds: int = 60) -> str:
     sas = generate_blob_sas(
         account_name=os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
         container_name=container,
