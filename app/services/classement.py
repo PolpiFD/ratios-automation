@@ -1,13 +1,8 @@
 import os, aiofiles, httpx, asyncio
 from azure.data.tables.aio import TableClient
 from azure.identity.aio import DefaultAzureCredential
+from ..core.config import settings
 
-# ---- CONFIG -----------------------------------------------------------------
-TABLE_URL  = "https://ratiostorage.table.core.windows.net"
-TABLE_NAME = "ClientFolderIndex"
-CLIENT_ID  = os.getenv("AZURE_CLIENT_ID")          # service principal
-DRIVE_ID   = os.getenv("DRIVE_ID")                 # id global du drive
-# -----------------------------------------------------------------------------
 
 
 async def query_folder_id(client_folder_id: str, categorie: str) -> str | None:
@@ -17,8 +12,8 @@ async def query_folder_id(client_folder_id: str, categorie: str) -> str | None:
         ET category        == <categorie>
     Retourne folder_id ou None.
     """
-    credential = DefaultAzureCredential(managed_identity_client_id=CLIENT_ID)
-    async with TableClient(TABLE_URL, TABLE_NAME, credential=credential) as table:
+    credential = DefaultAzureCredential(managed_identity_client_id=settings.azure_client_id)
+    async with TableClient(settings.azure_storage_table_url, settings.azure_storage_table_name, credential=credential) as table:
         filt = (
             f"client_folder_id eq '{client_folder_id}' "
             f"and RowKey eq '{categorie}'"
@@ -42,7 +37,7 @@ async def upload_to_onedrive(file_bytes: bytes, filename: str, folder_id: str, t
     Charge le fichier dans le dossier OneDrive cible :
     PUT /drives/{driveId}/items/{folder_id}:/{filename}:/content
     """
-    url = f"https://graph.microsoft.com/v1.0/drives/{DRIVE_ID}/items/{folder_id}:/{filename}:/content"
+    url = f"https://graph.microsoft.com/v1.0/drives/{settings.drive_id}/items/{folder_id}:/{filename}:/content"
     headers = {
         "Authorization": f"Bearer {token}",
         "Content-Type": "application/octet-stream"

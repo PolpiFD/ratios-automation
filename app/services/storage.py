@@ -4,19 +4,15 @@ from azure.storage.blob import ContentSettings
 from azure.identity.aio import DefaultAzureCredential
 from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from datetime import datetime, timedelta
+from ..core.config import settings
 
-
-ACCOUNT_URL = os.getenv("AZURE_STORAGE_ACCOUNT_URL")
-CONTAINER = "file-automation-ratios"
-secret = os.getenv('AZURE_CLIENT_SECRET')
-
+print(f"Account URL -> {settings.azure_storage_account_url}")
 
 credential = DefaultAzureCredential()
-blob_service = BlobServiceClient(account_url=ACCOUNT_URL, credential=credential)
-container_client = blob_service.get_container_client(CONTAINER)
+blob_service = BlobServiceClient(account_url=settings.azure_storage_account_url, credential=credential)
+container_client = blob_service.get_container_client(settings.azure_blob_container)
 
 
-####################################################################################
 
 async def upload_file (data: bytes, filename: str, mime: str) -> str:
     blob_name = filename
@@ -30,11 +26,11 @@ async def upload_file (data: bytes, filename: str, mime: str) -> str:
 
 def make_read_sas_url (container: str, blob_name: str, seconds: int = 60) -> str:
     sas = generate_blob_sas(
-        account_name=os.getenv("AZURE_STORAGE_ACCOUNT_NAME"),
+        account_name=settings.azure_storage_account_name,
         container_name=container,
         blob_name=blob_name,
-        account_key=os.getenv("AZURE_STORAGE_ACCOUNT_KEY"),
+        account_key=settings.azure_storage_account_key,
         permission=BlobSasPermissions(read=True),
         expiry=datetime.utcnow() + timedelta(seconds=seconds)
     )
-    return f"{os.getenv('AZURE_STORAGE_ACCOUNT_URL')}/{container}/{blob_name}?{sas}"
+    return f"{settings.azure_storage_account_url}/{container}/{blob_name}?{sas}"

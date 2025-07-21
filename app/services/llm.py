@@ -12,9 +12,6 @@ if not os.environ.get("OPENAI_API_KEY"):
 async def categorisation(content: str, name_client: str):
     system_prompt = ChatPromptTemplate.from_template(
     """
-
-
-
     ## <ROLE>
     Vous êtes un expert comptable spécialisé dans l'analyse et la catégorisation de documents financiers suisses. 
     Votre tâche est de classifier avec précision les documents comptables selon leur nature.
@@ -131,7 +128,7 @@ async def categorisation(content: str, name_client: str):
             ...,
             description="Score de confiance sur la classification allant de 1% à 100% (1 signfie que c'est certain que le document est mal classifié, 100 nous sommes absolu sur du résultat)"
         )
-        anne: int = Field(
+        year: int = Field(
             ...,
             description="Année d'émission et/ou de paiement du document.",
         )
