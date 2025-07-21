@@ -1,9 +1,6 @@
 # app/core/config.py
 import os
 from pydantic import BaseModel
-from dotenv import load_dotenv
-load_dotenv()
-
 
 class Settings(BaseModel):
     # Azure Auth
@@ -19,7 +16,7 @@ class Settings(BaseModel):
     
     # Azure Table
     azure_table_url: str = os.getenv("AZURE_STORAGE_TABLE_URL", "")
-    table_name: str = os.getenv("AZURE_STORAGE_TABLE_NAME", "")
+    azure_table_name: str = os.getenv("AZURE_STORAGE_TABLE_NAME", "")
     
     # Document Intelligence
     azure_di_endpoint: str = os.getenv("AZURE_DI_ENDPOINT", "")

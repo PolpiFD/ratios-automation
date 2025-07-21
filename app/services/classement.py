@@ -13,7 +13,7 @@ async def query_folder_id(client_folder_id: str, categorie: str) -> str | None:
     Retourne folder_id ou None.
     """
     credential = DefaultAzureCredential(managed_identity_client_id=settings.azure_client_id)
-    async with TableClient(settings.azure_storage_table_url, settings.azure_storage_table_name, credential=credential) as table:
+    async with TableClient(settings.azure_table_url, settings.azure_table_name, credential=credential) as table:
         filt = (
             f"client_folder_id eq '{client_folder_id}' "
             f"and RowKey eq '{categorie}'"

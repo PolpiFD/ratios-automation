@@ -10,13 +10,13 @@ async def process_document_async(blob_url: str, client_id: str, client_name: str
         logging.info(f"🔄 Début traitement: {file_name}")
 
         #OCR première page
-        ocr_json = file_ocr(blob_url)
+        ocr_json = await file_ocr(blob_url)
         logging.info(f"✅ OCR terminé: {file_name}")
 
         # Classification LLM
-        category = categorisation(ocr_json, client_name)
+        category = await categorisation(ocr_json, client_name)
         logging.info(f"Année détectée : {category.year}")
-        row_key = f"{category.year}_{category.name}"
+        row_key = f"{category.year}_{category.categorie}"
         logging.info(f"🏷️ Catégorie détectée: {row_key}")
 
         # Classement dans le OneDrive
