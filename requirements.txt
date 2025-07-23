@@ -3,3 +3,14 @@ uvicorn[standard]==0.35.0 # serveur ASGI + extras perf
 azure-identity==1.23.0    # authentification Azure
 azure-storage-blob==12.25.1
 azure-ai-documentintelligence==1.0.0b4
+azure-data-tables==12.6.0  # Azure Table Storage
+httpx==0.28.1             # client HTTP async
+langchain==0.3.12         # LLM framework
+langchain-openai==0.2.14  # OpenAI integration
+openai==1.59.3            # OpenAI client
+pydantic==2.10.3          # validation données
+pydantic-settings==2.7.0  # gestion config
+python-dotenv==1.0.1      # variables environnement
+slowapi==0.1.9            # rate limiting
+requests==2.32.3          # client HTTP pour health checks
+python-multipart==0.0.20  # support form-data

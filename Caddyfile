@@ -1,0 +1,66 @@
+# Caddyfile - Configuration reverse proxy avec HTTPS automatique
+
+# Redirection HTTP vers HTTPS
+http://votre-domaine.com {
+    redir https://votre-domaine.com{uri} permanent
+}
+
+# Configuration HTTPS principale
+https://votre-domaine.com {
+    # Reverse proxy vers l'API
+    reverse_proxy /api/* app:8000
+    
+    # Health check endpoint
+    reverse_proxy /health app:8000
+    
+    # Headers de sécurité
+    header {
+        # Protection XSS
+        X-Content-Type-Options nosniff
+        X-Frame-Options DENY
+        X-XSS-Protection "1; mode=block"
+        
+        # HSTS (6 mois)
+        Strict-Transport-Security "max-age=15552000; includeSubDomains; preload"
+        
+        # CSP basique pour API
+        Content-Security-Policy "default-src 'none'; frame-ancestors 'none';"
+        
+        # Cacher la version du serveur
+        -Server
+    }
+    
+    # Rate limiting global
+    rate_limit {
+        zone api {
+            key    {remote_host}
+            events 100
+            window 1m
+        }
+    }
+    
+    # Logs structurés
+    log {
+        output file /var/log/caddy/access.log {
+            roll_size 10mb
+            roll_keep 5
+            roll_keep_for 24h
+        }
+        format json
+        level INFO
+    }
+    
+    # Page d'erreur personnalisée pour les autres routes
+    handle {
+        respond "API Ratios - Endpoints disponibles: /api/v1/webhook, /health" 404
+    }
+}
+
+# Configuration pour développement local (optionnel)
+localhost:80, 127.0.0.1:80 {
+    reverse_proxy app:8000
+    
+    log {
+        level DEBUG
+    }
+} 

@@ -1,8 +1,13 @@
 # app/core/config.py
 import os
+import secrets
 from pydantic import BaseModel
+from typing import Set
 
 class Settings(BaseModel):
+    # Sécurité
+    webhook_api_key: str = os.getenv("WEBHOOK_API_KEY", "")
+    
     # Azure Auth
     azure_client_id: str = os.getenv("AZURE_CLIENT_ID", "")
     azure_client_secret: str = os.getenv("AZURE_CLIENT_SECRET", "")

@@ -1,0 +1,65 @@
+services:
+  app:
+    image: ghcr.io/${{ github.repository }}:latest
+    container_name: ratios-api
+    restart: unless-stopped
+    environment:
+      - DEBUG=false
+      - WEBHOOK_API_KEY=${WEBHOOK_API_KEY}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+      - AZURE_CLIENT_SECRET=${AZURE_CLIENT_SECRET}
+      - AZURE_TENANT_ID=${AZURE_TENANT_ID}
+      - AZURE_STORAGE_ACCOUNT_URL=${AZURE_STORAGE_ACCOUNT_URL}
+      - AZURE_STORAGE_ACCOUNT_NAME=${AZURE_STORAGE_ACCOUNT_NAME}
+      - AZURE_STORAGE_ACCOUNT_KEY=${AZURE_STORAGE_ACCOUNT_KEY}
+      - AZURE_BLOB_CONTAINER=${AZURE_BLOB_CONTAINER}
+      - AZURE_STORAGE_TABLE_URL=${AZURE_STORAGE_TABLE_URL}
+      - AZURE_STORAGE_TABLE_NAME=${AZURE_STORAGE_TABLE_NAME}
+      - AZURE_DI_ENDPOINT=${AZURE_DI_ENDPOINT}
+      - AZURE_DI_KEY=${AZURE_DI_KEY}
+      - DRIVE_ID=${DRIVE_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LANGCHAIN_API_KEY=${LANGCHAIN_API_KEY}
+      - LANGCHAIN_TRACING_V2=${LANGCHAIN_TRACING_V2}
+      - LANGCHAIN_PROJECT=${LANGCHAIN_PROJECT}
+    volumes:
+      - ./data:/app/samples
+    networks:
+      - ratios-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=10)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  caddy:
+    image: caddy:2-alpine
+    container_name: ratios-proxy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - ratios-network
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+    external: true
+  caddy_config:
+
+networks:
+  ratios-network:
+    driver: bridge 

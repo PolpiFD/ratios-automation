@@ -1,0 +1,47 @@
+# Environnements virtuels
+venv/
+.venv/
+env/
+.env/
+
+# Cache Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Fichiers de développement
+.git/
+.gitignore
+.github/
+.vscode/
+.idea/
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Logs et temporaires
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
+
+# Tests
+tests/
+.coverage
+htmlcov/
+
+# Variables d'environnement (sécurité)
+.env
+.env.local
+.env.production
+
+# Samples de test (peuvent être volumineux)
+samples/*.json
+samples/*.pdf
+
+# Node modules si présents
+node_modules/
+npm-debug.log 

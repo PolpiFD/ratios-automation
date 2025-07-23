@@ -2,33 +2,52 @@
 import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from dotenv import load_dotenv
 load_dotenv()
 
-#from .core.config import settings
 from .api import webhook, health
 from .core.config import settings
 
-# Configuration logging
+# Configuration logging selon environnement
+if settings.debug:
+    log_level = logging.DEBUG
+else:
+    log_level = logging.INFO
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=log_level,
     format="%(asctime)s | %(name)s | %(levelname)s | %(message)s"
 )
+
+# Désactiver logs sensibles en production
+if not settings.debug:
+    logging.getLogger("azure").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
 
 # Création app FastAPI
 app = FastAPI(
     title="Ratios Automation API",
     description="API d'automatisation de traitement documentaire",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs" if settings.debug else None,  # Pas de docs en prod
+    redoc_url="/redoc" if settings.debug else None
 )
 
-# Middleware
+# Sécurité - Host de confiance
+app.add_middleware(
+    TrustedHostMiddleware, 
+    allowed_hosts=["ratios.lovable.app", "localhost", "127.0.0.1", "*.infomaniak.com"]
+)
+
+# CORS - Restreint aux domaines autorisés
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # À restreindre en production
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["https://ratios.lovable.app"],  # Production uniquement
+    allow_credentials=False,  # Pas de cookies pour une API
+    allow_methods=["POST", "GET"],
+    allow_headers=["Content-Type", "X-API-Key"],  # Headers spécifiques
 )
 
 # Routes
@@ -38,4 +57,9 @@ app.include_router(health.router)
 # Point d'entrée
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        app, 
+        host="0.0.0.0", 
+        port=8000,
+        access_log=settings.debug  # Pas de logs d'accès en prod
+    )
