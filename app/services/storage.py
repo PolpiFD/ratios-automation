@@ -6,13 +6,9 @@ from azure.storage.blob import generate_blob_sas, BlobSasPermissions
 from datetime import datetime, timedelta
 from ..core.config import settings
 
-print(f"Account URL -> {settings.azure_storage_account_url}")
-
 credential = DefaultAzureCredential()
 blob_service = BlobServiceClient(account_url=settings.azure_storage_account_url, credential=credential)
 container_client = blob_service.get_container_client(settings.azure_blob_container)
-
-
 
 async def upload_file (data: bytes, filename: str, mime: str) -> str:
     blob_name = filename
