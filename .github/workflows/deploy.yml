@@ -99,7 +99,8 @@ jobs:
           docker compose -f ~/ratios/docker-compose.yml down || true &&
           docker pull ${IMAGE_FULL} &&
           cd ~/ratios &&
-          sed -i 's|\\\${{ github.repository }}|polpifd/ratios-automation|g' docker-compose.yml &&
+          curl -sL https://raw.githubusercontent.com/PolpiFD/ratios-automation/main/docker-compose.yml -o docker-compose.yml &&
+          sed -i 's|\${{ github.repository }}|polpifd/ratios-automation|g' docker-compose.yml &&
           docker compose up -d &&
           docker image prune -f
         " 
