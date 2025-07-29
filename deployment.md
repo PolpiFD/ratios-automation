@@ -16,7 +16,7 @@
 
 ### **ÉTAPE 1** - Configurer GitHub Actions
 
-Dans **Settings → Secrets and variables → Actions** de votre repo, ajouter :
+Dans **Settings → Secrets and variables → Actions** de vore repo, ajouter :
 
 | Secret | Description | Exemple |
 |--------|-------------|---------|

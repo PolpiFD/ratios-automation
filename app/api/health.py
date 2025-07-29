@@ -10,7 +10,7 @@ router = APIRouter(tags=["monitoring"])
 async def health_check():
     return HealthResponse(
         status="healthy",
-        timestamp=datetime.utcnow().isoformat
+        timestamp=datetime.utcnow().isoformat()
     )
 
 @router.get("/ready")
