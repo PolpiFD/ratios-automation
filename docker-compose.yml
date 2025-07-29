@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/${{ github.repository }}:latest
+    image: ghcr.io/polpifd/ratios-automation:latest
     container_name: ratios-api
     restart: unless-stopped
     environment:
