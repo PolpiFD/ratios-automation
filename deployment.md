@@ -128,7 +128,7 @@ A    www         VOTRE_IP_VPS
 
 ```bash
 # Sur votre machine locale (pas le VPS !)
-git push origin main
+git push origin main.
 ```
 
 **C'est tout !** GitHub Actions va automatiquement :
