@@ -27,7 +27,13 @@ class Settings(BaseModel):
     azure_di_endpoint: str = os.getenv("AZURE_DI_ENDPOINT", "")
     azure_di_key: str = os.getenv("AZURE_DI_KEY", "")
     
-    # OneDrive
+    # SharePoint (Client Ratios)
+    sharepoint_client_id: str = os.getenv("SHAREPOINT_CLIENT_ID", "")
+    sharepoint_client_secret: str = os.getenv("SHAREPOINT_CLIENT_SECRET", "")
+    sharepoint_tenant_id: str = os.getenv("SHAREPOINT_TENANT_ID", "")
+    sharepoint_site_url: str = os.getenv("SHAREPOINT_SITE_URL", "")
+    
+    # OneDrive (legacy - à supprimer plus tard)
     drive_id: str = os.getenv("DRIVE_ID", "")
     
     # OpenAI

@@ -3,7 +3,7 @@ import traceback
 from ..services.ocr import file_ocr
 from ..services.llm import categorisation
 from ..services.classement import classer
-from jobs.get_graph_token import get_graph_token
+# Token plus nécessaire avec SharePoint service
 
 async def process_document_async(blob_url: str, client_id: str, client_name: str, file_name: str):
     try:
@@ -19,13 +19,12 @@ async def process_document_async(blob_url: str, client_id: str, client_name: str
         row_key = f"{category.year}_{category.categorie}"
         logging.info(f"🏷️ Catégorie détectée: {row_key}")
 
-        # Classement dans le OneDrive
+        # Classement dans SharePoint
         classement = await classer(
             blob_url,
             file_name,
             client_id,
-            row_key,
-            get_graph_token()
+            row_key
         )
 
         logging.info(f"✅ Document classé: {file_name} → {row_key}")

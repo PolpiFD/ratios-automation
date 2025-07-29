@@ -122,7 +122,7 @@ async def categorisation(content: str, name_client: str):
             description="""
             Cela correspond à la catégorie qui à laquelle appartient le document comptable
             """,
-            enum=["01 - Créanciers", "02 - Débiteurs", "03 - Banque", "04 - Tickets"]
+            enum=["01.1 - Créanciers", "01.2 - Tickets", "02 - Débiteurs", "03 - Banque"]
         )
         score: int = Field(
             ...,

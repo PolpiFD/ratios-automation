@@ -213,3 +213,6 @@ __marimo__/
 
 # MSAL refresh-token cache
 .msal_ratios.cache
+
+#claude
+.claude
