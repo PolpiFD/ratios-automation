@@ -27,10 +27,19 @@ Dans **Settings → Secrets and variables → Actions** de votre repo, ajouter :
 **Générer une clé SSH** (si nécessaire) :
 ```bash
 # Sur votre machine locale
-ssh-keygen -t ed25519 -f ~/.ssh/ratios_deploy
+ssh-keygen -t ed25519 -f ~/.ssh/ratios_deploy -C "github-actions@ratios"
+
+# Copier la clé publique sur le VPS
 ssh-copy-id -i ~/.ssh/ratios_deploy.pub root@VOTRE_IP_VPS
-cat ~/.ssh/ratios_deploy  # Copier dans SSH_PRIVATE_KEY
+
+# Tester la connexion SSH
+ssh -i ~/.ssh/ratios_deploy root@VOTRE_IP_VPS "echo 'SSH fonctionne'"
+
+# Copier la clé privée COMPLÈTE (avec BEGIN/END)
+cat ~/.ssh/ratios_deploy
 ```
+
+**⚠️ IMPORTANT** : La clé privée doit commencer par `-----BEGIN OPENSSH PRIVATE KEY-----` et finir par `-----END OPENSSH PRIVATE KEY-----`
 
 ### **ÉTAPE 2** - Préparer le VPS
 
@@ -114,14 +123,6 @@ LANGCHAIN_PROJECT=ratios-categorisation
 
 # Caddy - Email pour Let's Encrypt
 CADDY_EMAIL=your-email@gmail.com
-```
-
-### **ÉTAPE 5** - Configurer DNS
-
-Pointer votre domaine vers l'IP du VPS :
-```
-A    @           VOTRE_IP_VPS
-A    www         VOTRE_IP_VPS
 ```
 
 ### **ÉTAPE 6** - Premier déploiement
