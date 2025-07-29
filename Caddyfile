@@ -1,12 +1,17 @@
 # Caddyfile - Configuration reverse proxy avec HTTPS automatique
 
+# Configuration globale pour Let's Encrypt
+{
+    email {env.CADDY_EMAIL}
+}
+
 # Redirection HTTP vers HTTPS
-http://votre-domaine.com {
-    redir https://votre-domaine.com{uri} permanent
+http://ratios.futurdigitaln8n.ch {
+    redir https://ratios.futurdigitaln8n.ch{uri} permanent
 }
 
 # Configuration HTTPS principale
-https://votre-domaine.com {
+https://ratios.futurdigitaln8n.ch {
     # Reverse proxy vers l'API
     reverse_proxy /api/* app:8000
     

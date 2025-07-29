@@ -61,9 +61,6 @@ curl -O https://raw.githubusercontent.com/PolpiFD/ratios_categorisation/main/Cad
 
 # Modifier docker-compose.yml
 sed -i 's/\${{ github.repository }}/VOTRE_USERNAME\/ratios_categorisation/g' docker-compose.yml
-
-# Modifier Caddyfile avec votre domaine
-sed -i 's/votre-domaine.com/MON-DOMAINE.com/g' Caddyfile
 ```
 
 ### **ÉTAPE 4** - Créer le fichier .env
@@ -114,6 +111,9 @@ OPENAI_API_KEY=sk-your-openai-api-key
 LANGCHAIN_API_KEY=your-langchain-api-key
 LANGCHAIN_TRACING_V2=true
 LANGCHAIN_PROJECT=ratios-categorisation
+
+# Caddy - Email pour Let's Encrypt
+CADDY_EMAIL=your-email@gmail.com
 ```
 
 ### **ÉTAPE 5** - Configurer DNS
@@ -151,7 +151,7 @@ docker ps
 docker logs ratios-api -f
 
 # Test de l'API
-curl https://MON-DOMAINE.com/health
+curl https://ratios.futurdigitaln8n.ch/health
 ```
 
 ### Commandes utiles
@@ -190,6 +190,6 @@ sudo ufw enable
 - [ ] Fichiers docker-compose.yml et Caddyfile téléchargés et modifiés
 - [ ] Fichier .env créé avec les vraies valeurs
 - [ ] Premier push sur main effectué
-- [ ] Application accessible via https://MON-DOMAINE.com/health
+- [ ] Application accessible via https://ratios.futurdigitaln8n.ch/health
 
 **Après ça, chaque push sur `main` met à jour automatiquement la production !**

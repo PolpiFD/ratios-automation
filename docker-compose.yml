@@ -45,6 +45,8 @@ services:
     image: caddy:2-alpine
     container_name: ratios-proxy
     restart: unless-stopped
+    environment:
+      - CADDY_EMAIL=${CADDY_EMAIL}
     ports:
       - "80:80"
       - "443:443"
