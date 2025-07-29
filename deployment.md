@@ -23,6 +23,7 @@ Dans **Settings → Secrets and variables → Actions** de votre repo, ajouter :
 | `HOST` | IP de votre VPS | `185.xxx.xxx.xxx` |
 | `USERNAME` | Utilisateur SSH | `root` ou `ubuntu` |
 | `SSH_PRIVATE_KEY` | Clé privée SSH complète | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
+| `PASSWORD` | Mot de passe SSH (temporaire si clé fail) | `your-root-password` |
 
 **Générer une clé SSH** (si nécessaire) :
 ```bash

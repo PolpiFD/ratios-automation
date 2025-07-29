@@ -76,25 +76,20 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
     steps:
+    - name: 🔑 Setup SSH key
+      run: |
+        mkdir -p ~/.ssh
+        echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/deploy_key
+        chmod 600 ~/.ssh/deploy_key
+        ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
     - name: 🚀 Deploy to server
-      uses: appleboy/ssh-action@v1.0.0
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_PRIVATE_KEY }}
-        script: |
-          # Connexion au registry GitHub
-          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          
-          # Arrêter les anciens conteneurs
-          docker compose -f ~/ratios/docker-compose.yml down || true
-          
-          # Télécharger la nouvelle image
-          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-          
-          # Redémarrer avec la nouvelle image
-          cd ~/ratios
-          docker compose up -d
-          
-          # Nettoyage des anciennes images
-          docker image prune -f 
+      run: |
+        ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} "
+          echo '${{ secrets.GITHUB_TOKEN }}' | docker login ghcr.io -u '${{ github.actor }}' --password-stdin &&
+          docker compose -f ~/ratios/docker-compose.yml down || true &&
+          docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest &&
+          cd ~/ratios &&
+          docker compose up -d &&
+          docker image prune -f
+        " 
