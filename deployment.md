@@ -21,7 +21,7 @@ Dans **Settings → Secrets and variables → Actions** de votre repo, ajouter :
 | Secret | Description | Exemple |
 |--------|-------------|---------|
 | `HOST` | IP de votre VPS | `185.xxx.xxx.xxx` |
-| `USERNAME` | Utilisateur SSH | `root` ou `ubuntu` |
+| `USERNAME` | Utilisateur SSH | `debian`, `root` ou `ubuntu` |
 | `SSH_PRIVATE_KEY` | Clé privée SSH complète | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 | `PASSWORD` | Mot de passe SSH (temporaire si clé fail) | `your-root-password` |
 
@@ -31,10 +31,10 @@ Dans **Settings → Secrets and variables → Actions** de votre repo, ajouter :
 ssh-keygen -t ed25519 -f ~/.ssh/ratios_deploy -C "github-actions@ratios"
 
 # Copier la clé publique sur le VPS
-ssh-copy-id -i ~/.ssh/ratios_deploy.pub root@VOTRE_IP_VPS
+ssh-copy-id -i ~/.ssh/ratios_deploy.pub debian@VOTRE_IP_VPS
 
 # Tester la connexion SSH
-ssh -i ~/.ssh/ratios_deploy root@VOTRE_IP_VPS "echo 'SSH fonctionne'"
+ssh -i ~/.ssh/ratios_deploy debian@VOTRE_IP_VPS "echo 'SSH fonctionne'"
 
 # Copier la clé privée COMPLÈTE (avec BEGIN/END)
 cat ~/.ssh/ratios_deploy
@@ -46,7 +46,7 @@ cat ~/.ssh/ratios_deploy
 
 ```bash
 # Se connecter au VPS
-ssh root@VOTRE_IP_VPS
+ssh debian@VOTRE_IP_VPS
 
 # Installer Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
