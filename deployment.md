@@ -129,7 +129,7 @@ CADDY_EMAIL=your-email@gmail.com
 ### **ÉTAPE 6** - Premier déploiement
 
 ```bash
-# Sur votre machine locale (pas le VPS !)
+# Sur votre machine locale (pas le VPS .!)
 git push origin main.
 ```
 
