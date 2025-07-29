@@ -1,4 +1,4 @@
-import os, aiofiles, httpx, asyncio
+import os, httpx, asyncio
 from azure.data.tables.aio import TableClient
 from azure.identity.aio import DefaultAzureCredential
 from ..core.config import settings

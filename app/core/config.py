@@ -40,7 +40,14 @@ class Settings(BaseModel):
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
     
     # App config
+    debug: bool = os.getenv("DEBUG", "false").lower() == "true"
     max_file_size: int = 300 * 1024 * 1024
     allowed_extensions: set = {".pdf", ".jpeg", ".png", ".jpg"}
+    
+    # Extensions d'images à convertir en PDF
+    image_extensions: set = {".jpeg", ".png", ".jpg"}
+    
+    # Extensions HEIC (ajoutées si pillow-heif disponible)
+    heic_extensions: set = {".heic", ".heif"}
 
 settings = Settings()

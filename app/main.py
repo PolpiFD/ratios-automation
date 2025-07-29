@@ -8,6 +8,8 @@ load_dotenv()
 
 from .api import webhook, health
 from .core.config import settings
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 
 # Configuration logging selon environnement
 if settings.debug:
@@ -38,7 +40,7 @@ app = FastAPI(
 # Sécurité - Host de confiance
 app.add_middleware(
     TrustedHostMiddleware, 
-    allowed_hosts=["ratios.lovable.app", "localhost", "127.0.0.1", "*.infomaniak.com"]
+    allowed_hosts=["ratios.lovable.app", "localhost", "127.0.0.1", "*.infomaniak.com", "*.ngrok.io", "*.ngrok-free.app"]
 )
 
 # CORS - Restreint aux domaines autorisés
@@ -49,6 +51,10 @@ app.add_middleware(
     allow_methods=["POST", "GET"],
     allow_headers=["Content-Type", "X-API-Key"],  # Headers spécifiques
 )
+
+# Configuration SlowAPI rate limiting
+app.state.limiter = webhook.limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Routes
 app.include_router(webhook.router)

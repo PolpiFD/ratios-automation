@@ -14,3 +14,5 @@ python-dotenv==1.0.1      # variables environnement
 slowapi==0.1.9            # rate limiting
 requests==2.32.3          # client HTTP pour health checks
 python-multipart==0.0.20  # support form-data
+pillow==10.4.0            # manipulation d'images + formats
+img2pdf==0.4.4            # conversion optimisée vers PDF

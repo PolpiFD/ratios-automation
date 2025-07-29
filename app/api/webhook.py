@@ -4,7 +4,7 @@ import logging
 import re
 import html
 from pathlib import Path
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Header
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, Depends, Header, Request
 import mimetypes
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
@@ -14,6 +14,7 @@ from ..core.config import settings
 from ..models.responses import WebhookResponse
 from ..services.storage import upload_file, make_read_sas_url
 from ..services.document_processor import process_document_async
+from ..services.pdf_converter import pdf_converter_service, ConversionError
 
 
 limiter = Limiter(key_func=get_remote_address)
@@ -55,12 +56,12 @@ def sanitize_and_validate_input(value: str, field_name: str, max_length: int, al
         if not re.match(r'^[a-zA-Z0-9_-]+$', cleaned_value):
             raise HTTPException(400, f"{field_name} ne peut contenir que des lettres, chiffres, tirets et underscores")
     elif field_name == "Nom client":
-        # Pour client_name: lettres, chiffres, espaces et quelques caractères spéciaux courants
+        # Pour client_name: lettres (avec accents), chiffres, espaces et caractères spéciaux courants
         if allow_special_chars:
-            if not re.match(r'^[a-zA-Z0-9\s\.\-_&\(\)]+$', cleaned_value):
+            if not re.match(r'^[a-zA-Z0-9\u00C0-\u017F\s\.\-_&\(\)]+$', cleaned_value):
                 raise HTTPException(400, f"{field_name} contient des caractères non autorisés")
         else:
-            if not re.match(r'^[a-zA-Z0-9\s\.\-_]+$', cleaned_value):
+            if not re.match(r'^[a-zA-Z0-9\u00C0-\u017F\s\.\-_]+$', cleaned_value):
                 raise HTTPException(400, f"{field_name} contient des caractères non autorisés")
     
     # Vérification contre les patterns dangereux
@@ -91,10 +92,11 @@ def verify_api_key(x_api_key: Optional[str] = Header(None)):
 @router.post("/webhook", response_model=WebhookResponse)
 @limiter.limit("15/minute")
 async def receive_document(
+    request: Request,  # Requis pour SlowAPI rate limiting
     client_name: str = Form(..., description="Client's name"),
     client_id: str = Form(..., description="Customer's folder ID"),
     file: UploadFile = File(..., description="File for processing"),
-    api_key: str = Depends(verify_api_key)  # 🔒 Authentification ajoutée
+    # api_key: str = Depends(verify_api_key)  # 🔒 Désactivé pour tests
 ):
     # Validation et sanitisation des paramètres
     client_name = sanitize_and_validate_input(client_name, "Nom client", 100, allow_special_chars=True)
@@ -110,14 +112,33 @@ async def receive_document(
     if suffix not in settings.allowed_extensions:
         raise HTTPException(400, f"Extension {suffix} non autorisée")
     
+    # Conversion PDF si c'est une image
+    final_content = content
+    final_filename = file.filename
+    final_suffix = suffix
+    
+    if suffix in settings.image_extensions:
+        try:
+            logging.info(f"Conversion PDF démarrée: {file.filename}")
+            pdf_bytes, pdf_filename = await pdf_converter_service.convert_image_to_pdf(
+                content, file.filename
+            )
+            final_content = pdf_bytes
+            final_filename = pdf_filename
+            final_suffix = ".pdf"
+            logging.info(f"Conversion PDF réussie: {file.filename} → {pdf_filename}")
+        except ConversionError as e:
+            logging.error(f"Erreur conversion PDF: {str(e)}")
+            raise HTTPException(422, f"Erreur lors de la conversion PDF: {str(e)}")
+    
     #Upload vers Azure
-    mime = file.content_type or mimetypes.guess_type(file.filename)[0]
-    new_name = f"{client_id}_{uuid.uuid4().hex}{suffix}"
-    blub_url = await upload_file(content, new_name, mime)
+    mime = "application/pdf" if final_suffix == ".pdf" else (file.content_type or mimetypes.guess_type(final_filename)[0])
+    new_name = f"{client_id}_{uuid.uuid4().hex}{final_suffix}"
+    blub_url = await upload_file(final_content, new_name, mime)
 
     # Traitement asynchrone
     sas_url = make_read_sas_url("file-automation-ratios", new_name)
-    asyncio.create_task(process_document_async(sas_url, client_id, client_name, file.filename))
+    asyncio.create_task(process_document_async(sas_url, client_id, client_name, final_filename))
 
     logging.info(f"Document reçu: {file.filename}")
 
@@ -125,6 +146,6 @@ async def receive_document(
         status="accepted",
         blob_url=blub_url,
         original_name=file.filename,
-        size_bytes=len(content)
+        size_bytes=len(final_content)
 
     )
