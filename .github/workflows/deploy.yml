@@ -8,7 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  IMAGE_NAME: polpifd/ratios-automation
 
 jobs:
   test:
@@ -99,6 +99,7 @@ jobs:
           docker compose -f ~/ratios/docker-compose.yml down || true &&
           docker pull ${IMAGE_FULL} &&
           cd ~/ratios &&
+          sed -i 's|\\\${{ github.repository }}|polpifd/ratios-automation|g' docker-compose.yml &&
           docker compose up -d &&
           docker image prune -f
         " 
