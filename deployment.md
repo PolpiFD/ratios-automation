@@ -18,7 +18,7 @@
 
 Dans **Settings → Secrets and variables → Actions** de vore repo, ajouter :
 
-| Secret | Description | Exemple. |
+| Secret | Descripftion | Exemple. |
 |--------|-------------|---------|
 | `HOST` | IP de votre VPS | `185.xxx.xxx.xxx` |
 | `USERNAME` | Utilisateur SSH | `debian`, `root` ou `ubuntu` |
