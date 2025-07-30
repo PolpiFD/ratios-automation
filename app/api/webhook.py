@@ -96,7 +96,7 @@ async def receive_document(
     client_name: str = Form(..., description="Client's name"),
     client_id: str = Form(..., description="Customer's folder ID"),
     file: UploadFile = File(..., description="File for processing"),
-    # api_key: str = Depends(verify_api_key)  # 🔒 Désactivé pour tests
+    api_key: str = Depends(verify_api_key)  # 🔒 Réactivé
 ):
     # Validation et sanitisation des paramètres
     client_name = sanitize_and_validate_input(client_name, "Nom client", 100, allow_special_chars=True)
