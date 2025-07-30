@@ -80,7 +80,7 @@ def sanitize_and_validate_input(value: str, field_name: str, max_length: int, al
     
     return cleaned_value
 
-def verify_api_key(x_api_key: Optional[str] = Header(None)):
+def verify_api_key(x_api_key: Optional[str] = Header(None, alias="X-API-KEY")):
     """Vérification de la clé API"""
     if not x_api_key or x_api_key != settings.webhook_api_key:
         raise HTTPException(
