@@ -40,7 +40,7 @@ app = FastAPI(
 # Sécurité - Host de confiance
 app.add_middleware(
     TrustedHostMiddleware, 
-    allowed_hosts=["ratios.lovable.app", "localhost", "127.0.0.1", "*.infomaniak.com", "*.ngrok.io", "*.ngrok-free.app"]
+    allowed_hosts=["ratios.lovable.app", "ratios.futurdigitaln8n.ch", "localhost", "127.0.0.1", "app", "*.infomaniak.com", "*.ngrok.io", "*.ngrok-free.app"]
 )
 
 # CORS - Restreint aux domaines autorisés
