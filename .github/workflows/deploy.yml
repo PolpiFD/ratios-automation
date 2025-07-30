@@ -105,7 +105,10 @@ jobs:
           docker compose down || true
           sleep 2
           echo 'Downloading docker-compose.yml...'
+          sudo chown -R debian:debian ~/ratios || true
+          rm -f docker-compose.yml
           curl -sL https://raw.githubusercontent.com/PolpiFD/ratios-automation/main/docker-compose.yml -o docker-compose.yml
+          echo 'File downloaded, size:' $(wc -c < docker-compose.yml)
           echo 'Starting containers...'
           docker compose up -d
           echo 'Cleanup...'
