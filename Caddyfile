@@ -48,9 +48,9 @@ https://ratios.futurdigitaln8n.ch {
         level INFO
     }
     
-    # Page d'erreur personnalisée pour les autres routes
-    handle {
-        respond "API Ratios - Endpoints disponibles: /api/v1/webhook, /health" 404
+    # Page d'erreur pour les routes non-API seulement
+    handle /* {
+        respond "API Ratios - Endpoints: /api/v1/webhook, /health" 404
     }
 }
 
