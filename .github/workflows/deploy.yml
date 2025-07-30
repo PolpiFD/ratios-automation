@@ -96,10 +96,8 @@ jobs:
       run: |
         ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${USERNAME}@${HOST} "
           echo '${GITHUB_TOKEN}' | docker login ghcr.io -u '${GITHUB_ACTOR}' --password-stdin &&
-          docker compose -f ~/ratios/docker-compose.yml down || true &&
           docker pull ${IMAGE_FULL} &&
           cd ~/ratios &&
           curl -sL https://raw.githubusercontent.com/PolpiFD/ratios-automation/main/docker-compose.yml -o docker-compose.yml &&
-          docker compose up -d &&
-          docker image prune -f
+          docker compose up -d --force-recreate
         " 
