@@ -35,14 +35,7 @@ https://ratios.futurdigitaln8n.ch {
         -Server
     }
     
-    # Rate limiting global
-    rate_limit {
-        zone api {
-            key    {remote_host}
-            events 100
-            window 1m
-        }
-    }
+    # Rate limiting géré par l'API (SlowAPI)
     
     # Logs structurés
     log {
