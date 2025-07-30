@@ -96,12 +96,19 @@ jobs:
       run: |
         ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no ${USERNAME}@${HOST} "
           set -e
+          echo 'Login Docker...'
           echo '${GITHUB_TOKEN}' | docker login ghcr.io -u '${GITHUB_ACTOR}' --password-stdin
+          echo 'Pull image...'
           docker pull ${IMAGE_FULL}
+          echo 'Stopping containers...'
           cd ~/ratios
           docker compose down || true
           sleep 2
+          echo 'Downloading docker-compose.yml...'
           curl -sL https://raw.githubusercontent.com/PolpiFD/ratios-automation/main/docker-compose.yml -o docker-compose.yml
+          echo 'Starting containers...'
           docker compose up -d
+          echo 'Cleanup...'
           docker image prune -f
+          echo 'Deploy completed!'
         " 
