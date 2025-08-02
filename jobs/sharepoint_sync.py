@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import re
+import httpx
 from datetime import datetime, timezone
 from azure.data.tables.aio import TableClient
 from azure.identity.aio import DefaultAzureCredential
@@ -16,6 +17,8 @@ from app.services.sharepoint import sharepoint_service
 CLIENT_ID = settings.azure_client_id
 TABLE_NAME = settings.azure_table_name
 TABLE_URL = settings.azure_table_url
+AUTH_KEY = settings.auth_key_supabase
+URL_SUPABASE = settings.supabase_url_sync
 
 # Nouvelles catégories SharePoint
 SHAREPOINT_CATEGORIES = {
@@ -170,6 +173,50 @@ async def upsert_sharepoint_index(rows):
     logging.info("Index Azure Table mis à jour avec succès")
 
 
+async def send_to_supabase(folders):
+    """
+    Envoie les données des clients uniques vers Supabase
+    """
+    
+    # Extraire les clients uniques avec leur ID SharePoint
+    clients_map = {}
+    for folder in folders:
+        client_name = folder["client"]
+        client_id = folder["client_folder_id"]
+        if client_name not in clients_map:
+            clients_map[client_name] = client_id
+    
+    # Préparer les données au format attendu
+    items = [
+        {"sharepoint_id": sharepoint_id, "nom": nom}
+        for nom, sharepoint_id in clients_map.items()
+    ]
+    
+    data = {"items": items}
+    
+    logging.info(f"📤 Envoi de {len(items)} clients vers Supabase")
+    
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(
+                URL_SUPABASE,
+                json=data,
+                headers={
+                    "x-auth-key": AUTH_KEY,
+                    "Content-Type": "application/json"
+                }
+            )
+            response.raise_for_status()
+            logging.info(f"✅ Données envoyées à Supabase avec succès: {response.status_code}")
+            return response.json() if response.text else None
+    except httpx.HTTPStatusError as e:
+        logging.error(f"❌ Erreur HTTP lors de l'envoi à Supabase: {e.response.status_code} - {e.response.text}")
+        raise
+    except Exception as e:
+        logging.error(f"❌ Erreur lors de l'envoi à Supabase: {str(e)}")
+        raise
+
+
 async def main():
     """Point d'entrée principal pour la synchronisation SharePoint"""
     logging.basicConfig(
@@ -188,6 +235,14 @@ async def main():
         
         # Mise à jour de l'index
         await upsert_sharepoint_index(folders)
+        
+        # Envoi des données clients vers Supabase
+        if folders:
+            try:
+                await send_to_supabase(folders)
+            except Exception as e:
+                logging.warning(f"⚠️ Échec de l'envoi à Supabase (non bloquant): {str(e)}")
+                # On continue même si l'envoi à Supabase échoue
         
         logging.info(f"Synchronisation SharePoint terminée: {len(folders)} dossiers indexés")
         

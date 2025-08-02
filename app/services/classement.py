@@ -1,4 +1,5 @@
-import os, httpx, asyncio
+import httpx
+import logging
 from azure.data.tables.aio import TableClient
 from azure.identity.aio import DefaultAzureCredential
 from ..core.config import settings
@@ -41,7 +42,7 @@ async def upload_to_sharepoint(file_bytes: bytes, filename: str, folder_path: st
 
 
 async def classer(blob_url: str, filename: str, client_folder_id: str,
-                  categorie: str, graph_token: str = None):
+                  categorie: str):
     """
     Étapes :
     1. Trouver le sous-dossier correspondant (table Azure)
@@ -50,7 +51,8 @@ async def classer(blob_url: str, filename: str, client_folder_id: str,
     """
     target_folder_path = await query_folder_path(client_folder_id, categorie)
     if not target_folder_path:
-        raise RuntimeError("Sous-dossier SharePoint introuvable pour la catégorie")
+        logging.error(f"❌ Sous-dossier introuvable pour client_folder_id={client_folder_id}, categorie={categorie}")
+        raise RuntimeError(f"Sous-dossier SharePoint introuvable pour la catégorie {categorie} du client {client_folder_id}")
 
     data = await download_blob(blob_url)
     await upload_to_sharepoint(data, filename, target_folder_path)
@@ -62,14 +64,28 @@ async def query_folder_path(client_folder_id: str, categorie: str) -> str | None
     Cherche le chemin du dossier SharePoint pour un client et une catégorie donnés
     Retourne le chemin complet ou None
     """
+    logging.info(f"🔍 Recherche dossier SharePoint - Client: {client_folder_id}, Catégorie: {categorie}")
+    
     credential = DefaultAzureCredential(managed_identity_client_id=settings.azure_client_id)
     async with TableClient(settings.azure_table_url, settings.azure_table_name, credential=credential) as table:
         filt = (
             f"client_folder_id eq '{client_folder_id}' "
             f"and RowKey eq '{categorie}'"
         )
+        logging.info(f"🔍 Filtre Azure Table: {filt}")
+        
         entities = table.query_entities(query_filter=filt, results_per_page=1)
         async for page in entities.by_page():
             async for e in page:
-                return e.get("folder_path")  # Nouveau champ pour le chemin SharePoint
+                logging.info(f"📋 Entity trouvée: {dict(e)}")
+                # Essayer d'abord folder_path, sinon folder_id
+                folder_path = e.get("folder_path") or e.get("folder_id")
+                if folder_path:
+                    logging.info(f"✅ Dossier trouvé: {folder_path}")
+                    return folder_path
+                else:
+                    logging.warning(f"⚠️ Entity sans folder_path ni folder_id: {dict(e)}")
+                    return None
+        
+        logging.warning(f"❌ Aucune entity trouvée pour client_folder_id={client_folder_id}, categorie={categorie}")
     return None

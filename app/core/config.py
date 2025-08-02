@@ -38,6 +38,10 @@ class Settings(BaseModel):
     
     # OpenAI
     openai_api_key: str = os.getenv("OPENAI_API_KEY", "")
+
+    # Supabase
+    supabase_url_sync: str = os.getenv("SUPABASE_URL_SYNC", "")
+    auth_key_supabase: str = os.getenv("AUTH_KEY_SUPABASE", "")
     
     # App config
     debug: bool = os.getenv("DEBUG", "false").lower() == "true"

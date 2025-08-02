@@ -95,12 +95,15 @@ async def receive_document(
     request: Request,  # Requis pour SlowAPI rate limiting
     client_name: str = Form(..., description="Client's name"),
     client_id: str = Form(..., description="Customer's folder ID"),
+    #comment: str = Form(..., description="Comment about the file"),
     file: UploadFile = File(..., description="File for processing"),
     api_key: str = Depends(verify_api_key)  # 🔒 Réactivé
 ):
     # Validation et sanitisation des paramètres
     client_name = sanitize_and_validate_input(client_name, "Nom client", 100, allow_special_chars=True)
     client_id = sanitize_and_validate_input(client_id, "ID client", 50)
+    #comment = sanitize_and_validate_input(comment, "Commentaire", 200)
+    #print(f"Comment ->  {comment}")
 
     #Validation taille
     content = await file.read()
@@ -144,7 +147,6 @@ async def receive_document(
 
     return WebhookResponse(
         status="accepted",
-        blob_url=blub_url,
         original_name=file.filename,
         size_bytes=len(final_content)
 

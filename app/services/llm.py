@@ -91,6 +91,8 @@ async def categorisation(content: str, name_client: str):
     - Appliquez les critères de classification dans l'ordre de priorité
     - En cas d'ambiguïté, privilégiez l'identification de l'émetteur du document
     - Fournissez uniquement la catégorie finale sans explication supplémentaire
+    - Au niveau de la categorie, il est absolument necessaire de la re-transcrire tel que notifie dans les exemples
+        ("01.1 - Créanciers", "01.2 - Tickets", "02 - Débiteurs", "03 - Banque")
     </OUTPUT_INSTRUCTIONS>
 
     ## <EXAMPLES>
@@ -98,20 +100,20 @@ async def categorisation(content: str, name_client: str):
     ### Exemple Débiteurs
     Document OCR contenant : "ENTREPRISE MARTIN SA, Rue du Commerce 12, 1000 Lausanne, FACTURE N° 2024-001"
     Client : "ENTREPRISE MARTIN SA"
-    → Classification : Débiteurs (le client est l'émetteur)
+    → Classification : '02 - Débiteurs' -> (le client est l'émetteur)
 
     ### Exemple Créanciers  
     Document OCR contenant : "FOURNISSEUR TECH SARL, Avenue de la Paix 5, 1200 Genève, Facturé à : ENTREPRISE MARTIN SA"
     Client : "ENTREPRISE MARTIN SA" 
-    → Classification : Créanciers (facture reçue d'un fournisseur)
+    → Classification : '01.1 - Créanciers' (facture reçue d'un fournisseur)
 
     ### Exemple Banque
     Document OCR contenant : "BANQUE CANTONALE VAUDOISE, Relevé de compte, Période du 01.01.2024 au 31.01.2024"
-    → Classification : Banque (document bancaire identifié)
+    → Classification : '03 - Banque'
 
     ### Exemple Tickets
     Document OCR contenant : "RESTAURANT LE PIGEON, Rue Centrale 8, Addition N°1234, Total : 45.50 CHF"
-    → Classification : Tickets (petit achat restaurant)
+    → Classification : '01.2 - Tickets' (petit achat restaurant)
     </EXAMPLES>
     """
     )
